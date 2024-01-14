@@ -74,6 +74,119 @@
 #define CMD_PROGRAM_MAX 0xC9
 #define CMD_PROGRAM_VERIFY 0xC8
 
+/* Response */
+#define CMD_POSITIVE_RESPONSE 0xFF
+#define CMD_NEGATIVE_RESPONSE 0xFE
+#define CMD_EVENT_PACKET 0xFD
+#define CMD_SERVICE_PACKET 0xFC
+
+/* Command response */
+#define CMD_CONNECT_POSITIVE_RESPONSE 0xFF
+#define CMD_STATUS_POSITIVE_RESPONSE 0xFD
+#define CMD_COMMON_MODE_INFO_POSITIVE_RESPONSE 0xFB
+#define CMD_ID_POSITIVE_RESPONSE 0xFA
+#define CMD_SEED_POSITIVE_RESPONSE 0xF8
+#define CMD_UNLOCK_POSITIVE_RESPONSE 0xF7
+#define CMD_UPLOAD_POSITIVE_RESPONSE 0xF5
+#define CMD_SHORT_UPLOAD_POSITIVE_RESPONSE 0xF4
+#define CMD_CHECKSUM_POSITIVE_RESPONSE 0xF3
+#define CMD_CAL_PAGE_POSITIVE_RESPONSE 0xEA
+#define CMD_PAG_PROCESSOR_INFO_POSITIVE_RESPONSE 0xE9
+#define CMD_PAGE_INFO_POSITIVE_RESPONSE 0xE7
+#define CMD_SEGMENT_MODE_INFO_POSITIVE_RESPONSE 0xE5
+#define CMD_DAQ_LIST_POSITIVE_RESPONSE 0xDF
+#define CMD_START_STOP_DAQ_LIST_POSITIVE_RESPONSE 0xDE
+#define CMD_DAQ_CLOCK_LIST_POSITIVE_RESPONSE 0xDC
+#define CMD_READ_DAQ_POSITIVE_RESPONSE 0xDB
+#define CMD_DAQ_PROCESSOR_INFO_POSITIVE_RESPONSE 0xDA
+#define CMD_DAQ_RESOLUTION_INFO_POSITIVE_RESPONSE 0xD9
+#define CMD_DAQ_LIST_INFO_POSITIVE_RESPONSE 0xD8
+#define CMD_DAQ_EVENT_INFO_POSITIVE_RESPONSE 0xD7
+#define CMD_PROGRAM_START_POSITIVE_RESPONSE 0xD2
+#define CMD_PGM_PROCESSOR_POSITIVE_RESPONSE 0xCE
+#define CMD_SECTOR_INFO_POSITIVE_RESPONSE 0xCD
+
+/* Connection mode */
+#define CMD_CONNECT_NORMAL_MODE 0x00
+#define CMD_CONNECT_USER_MODE 0x01
+
+/* Get identifier types */
+#define CMD_GET_ID_ASCII 0x00
+#define CMD_GET_ID_FILENAME_WITHOUT_PATH_AND_EXTENSION 0x01
+#define CMD_GET_ID_FILENAME_WITH_PATH_AND_EXTENSION 0x02
+#define CMD_GET_ID_URL 0x03
+#define CMD_GET_ID_FILE 0x04
+
+/* Set request mode */
+#define CMD_SET_REQUEST_STORE_CAL_REQ 0x00
+#define CMD_SET_REQUEST_STORE_DAQ_REQ 0x01
+#define CMD_SET_REQUEST_CLEAR_DAQ_REQ 0x02
+#define CMD_SET_REQUEST_X3 0x03
+#define CMD_SET_REQUEST_X4 0x04
+#define CMD_SET_REQUEST_X5 0x05
+#define CMD_SET_REQUEST_X6 0x06
+#define CMD_SET_REQUEST_X7 0x07
+
+/* Get seed mode */
+#define CMD_GET_SEED_MODE_FIRST 0x00
+#define CMD_GET_SEED_MODE_REMAINING 0x01
+
+/* Get seed resource */
+#define CMD_GET_SEED_RESOURCE 0x00
+#define CMD_GET_SEED_IGNORE 0x01
+
+/* Transport layer sub command */
+#define CMD_TRANSPORT_LAYER_GET_SLAVE_ID 0xFF
+#define CMD_TRANSPORT_LAYER_GET_DAQ_ID 0xFE
+#define CMD_TRANSPORT_LAYER_SET_DAQ_ID 0xFD
+
+/* Transport layer get id echo mode */
+#define CMD_TRANSPORT_LAYER_GET_ID_IDENTIFY_BY_ECHO 0x00
+#define CMD_TRANSPORT_LAYER_GET_ID_CONFIRM_BY_INVERSE_ECHO 0x01
+
+/* Get segment info mode */
+#define CMD_GET_SEGMENT_INFO_MODE_GET_BASIC_ADDRESS_INFO 0x00
+#define CMD_GET_SEGMENT_INFO_MODE_GET_STANDARD_INFO 0x01
+#define CMD_GET_SEGMENT_INFO_MODE_GET_ADDRESS_MAPPING_INFO 0x02
+
+/* Set segment mode */
+#define CMD_SET_SEGMENT_MODE_FREEZE 0x00
+#define CMD_SET_SEGMENT_MODE_X1 0x01
+#define CMD_SET_SEGMENT_MODE_X2 0x02
+#define CMD_SET_SEGMENT_MODE_X3 0x03
+#define CMD_SET_SEGMENT_MODE_X4 0x04
+#define CMD_SET_SEGMENT_MODE_X5 0x05
+#define CMD_SET_SEGMENT_MODE_X6 0x06
+#define CMD_SET_SEGMENT_MODE_X7 0x07
+
+/* Set DAQ list mode */
+#define CMD_SET_DAQ_LIST_MODE_X0 0x00
+#define CMD_SET_DAQ_LIST_MODE_DIRECTION 0x01
+#define CMD_SET_DAQ_LIST_MODE_X2 0x02
+#define CMD_SET_DAQ_LIST_MODE_X3 0x03
+#define CMD_SET_DAQ_LIST_MODE_TIMESTAMP 0x04
+#define CMD_SET_DAQ_LIST_MODE_PID_OFF 0x05
+#define CMD_SET_DAQ_LIST_MODE_X6 0x06
+#define CMD_SET_DAQ_LIST_MODE_X7 0x07
+
+/* Start stop DAQ list mode */
+#define CMD_START_STOP_DAQ_LIST_MODE_STOP 0x00
+#define CMD_START_STOP_DAQ_LIST_MODE_START 0x01
+#define CMD_START_STOP_DAQ_LIST_MODE_SELECT 0x02
+
+/* Start stop synch mode */
+#define CMD_START_STOP_SYNCH_MODE_STOP 0X00
+#define CMD_START_STOP_SYNCH_MODE_START 0X01
+#define CMD_START_STOP_SYNCH_MODE_SELECT 0X02
+
+/* Get sector info address mode */
+#define CMD_GET_SECTOR_INFO_ADDRESS_MODE_GET_ADDRESS 0X00
+#define CMD_GET_SECTOR_INFO_ADDRESS_MODE_GET_LENGTH 0X01
+
+/* Program verify start mode */
+#define CMD_PROGRAM_VERIFY_START_MODE_REQUEST_TO_START_INTERNAL_ROUTINE 0X00
+#define CMD_PROGRAM_VERIFY_START_MODE_SENDING_VERIFICATION_VALUE 0X01
+
 static const value_string xcp_cmd[] = {
     /* Standard commmand */
     { CMD_CONNECT,              "Connect"},
@@ -155,11 +268,43 @@ static int hf_xcp_len;
 static int hf_xcp_ctr;
 static int hf_xcp_pid;
 static int hf_xcp_fill;
+
+static int hf_xcp_connection_mode;
+static int hf_xcp_identification_type;
+static int hf_xcp_set_request_mode;
+static int hf_xcp_set_request_resource;
+
+static int hf_xcp_get_seed_mode;
+static int hf_xcp_get_seed_resource;
+
 /*static int hf_xcp_daq;
 static int hf_xcp_timestamp;
 static int hf_xcp_data;
 */
 static gint ett_xcp;
+
+static void
+dissect_xcp_cmd_request(proto_tree *xcp_tree, tvbuff_t *tvb, guint pid, gint *offset)
+{
+    if(pid == CMD_CONNECT)
+    {
+        proto_tree_add_item(xcp_tree, hf_xcp_connection_mode, tvb, *offset, 1, ENC_BIG_ENDIAN);
+    }
+    else if(pid == CMD_GET_ID)
+    {
+        proto_tree_add_item(xcp_tree, hf_xcp_identification_type, tvb, *offset, 1, ENC_BIG_ENDIAN);
+    }
+    else if(pid == CMD_SET_REQUEST)
+    {
+        proto_tree_add_item(xcp_tree, hf_xcp_set_request_mode, tvb, *offset, 1, ENC_BIG_ENDIAN);
+        proto_tree_add_item(xcp_tree, hf_xcp_set_request_resource, tvb, *offset, 1, ENC_BIG_ENDIAN);
+    }
+    else if(pid == CMD_GET_SEED)
+    {
+        proto_tree_add_item(xcp_tree, hf_xcp_get_seed_mode, tvb, *offset, 1, ENC_BIG_ENDIAN);
+        proto_tree_add_item(xcp_tree, hf_xcp_get_seed_resource, tvb, *offset, 1, ENC_BIG_ENDIAN);
+    }
+}
 
 static int
 dissect_xcp(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree _U_, void *data _U_)
@@ -195,11 +340,14 @@ dissect_xcp(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree _U_, void *data 
     proto_item_append_text(ti, ", %s", info);
     col_add_str(pinfo->cinfo, COL_INFO, info);
 
+    dissect_xcp_cmd_request(xcp_tree, tvb, pid, &offset);
+
     if (data_len > 1)
     {
-        proto_tree_add_item(xcp_tree, hf_xcp_fill, tvb, offset, 1, ENC_BIG_ENDIAN);
+    /* TODO: Check when FILL is required */
+/*        proto_tree_add_item(xcp_tree, hf_xcp_fill, tvb, offset, 1, ENC_BIG_ENDIAN);
         offset += 1;        
-    }    
+*/    }
 
     /* TODO: Perform data length check */
     /* TODO: Timestamp length check (1,2,4 bytes) is required */
@@ -228,6 +376,28 @@ proto_register_xcp(void)
                 NULL, 0x0, NULL, HFILL } },
         { &hf_xcp_fill,
             {   "Fill", "xcp.fill", FT_UINT8, BASE_DEC,  
+                NULL, 0x0, NULL, HFILL } },
+
+        { &hf_xcp_connection_mode,
+            {   "Connection mode", "xcp.connection_mode", FT_UINT8, BASE_DEC,  
+                NULL, 0x0, NULL, HFILL } },
+
+        { &hf_xcp_identification_type,
+            {   "Identification type", "xcp.identification_type", FT_UINT8, BASE_DEC,  
+                NULL, 0x0, NULL, HFILL } },
+
+        { &hf_xcp_set_request_mode,
+            {   "Mode", "xcp.mode", FT_UINT8, BASE_DEC,  
+                NULL, 0x0, NULL, HFILL } },
+        { &hf_xcp_set_request_resource,
+            {   "Resource", "xcp.resource", FT_UINT16, BASE_DEC,  
+                NULL, 0x0, NULL, HFILL } },
+
+        { &hf_xcp_get_seed_mode,
+            {   "Mode", "xcp.mode", FT_UINT8, BASE_DEC,  
+                NULL, 0x0, NULL, HFILL } },
+        { &hf_xcp_get_seed_resource,
+            {   "Resource", "xcp.resource", FT_UINT8, BASE_DEC,  
                 NULL, 0x0, NULL, HFILL } },
     };
 
