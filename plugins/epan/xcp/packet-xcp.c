@@ -118,14 +118,14 @@
 #define CMD_GET_ID_FILE 0x04
 
 /* Set request mode */
-#define CMD_SET_REQUEST_STORE_CAL_REQ 0x00
-#define CMD_SET_REQUEST_STORE_DAQ_REQ 0x01
-#define CMD_SET_REQUEST_CLEAR_DAQ_REQ 0x02
-#define CMD_SET_REQUEST_X3 0x03
-#define CMD_SET_REQUEST_X4 0x04
-#define CMD_SET_REQUEST_X5 0x05
-#define CMD_SET_REQUEST_X6 0x06
-#define CMD_SET_REQUEST_X7 0x07
+#define CMD_SET_REQUEST_STORE_CAL_REQ 0x01 << 0
+#define CMD_SET_REQUEST_STORE_DAQ_REQ 0x01 << 1
+#define CMD_SET_REQUEST_CLEAR_DAQ_REQ 0x01 << 2
+#define CMD_SET_REQUEST_X3 0x01 << 3
+#define CMD_SET_REQUEST_X4 0x01 << 4
+#define CMD_SET_REQUEST_X5 0x01 << 5
+#define CMD_SET_REQUEST_X6 0x01 << 6
+#define CMD_SET_REQUEST_X7 0x01 << 7
 
 /* Get seed mode */
 #define CMD_GET_SEED_MODE_FIRST 0x00
@@ -150,24 +150,24 @@
 #define CMD_GET_SEGMENT_INFO_MODE_GET_ADDRESS_MAPPING_INFO 0x02
 
 /* Set segment mode */
-#define CMD_SET_SEGMENT_MODE_FREEZE 0x00
-#define CMD_SET_SEGMENT_MODE_X1 0x01
-#define CMD_SET_SEGMENT_MODE_X2 0x02
-#define CMD_SET_SEGMENT_MODE_X3 0x03
-#define CMD_SET_SEGMENT_MODE_X4 0x04
-#define CMD_SET_SEGMENT_MODE_X5 0x05
-#define CMD_SET_SEGMENT_MODE_X6 0x06
-#define CMD_SET_SEGMENT_MODE_X7 0x07
+#define CMD_SET_SEGMENT_MODE_FREEZE 0x01 << 0
+#define CMD_SET_SEGMENT_MODE_X1 0x01 << 1
+#define CMD_SET_SEGMENT_MODE_X2 0x01 << 2
+#define CMD_SET_SEGMENT_MODE_X3 0x01 << 3
+#define CMD_SET_SEGMENT_MODE_X4 0x01 << 4
+#define CMD_SET_SEGMENT_MODE_X5 0x01 << 5
+#define CMD_SET_SEGMENT_MODE_X6 0x01 << 6
+#define CMD_SET_SEGMENT_MODE_X7 0x01 << 7
 
 /* Set DAQ list mode */
-#define CMD_SET_DAQ_LIST_MODE_X0 0x00
-#define CMD_SET_DAQ_LIST_MODE_DIRECTION 0x01
-#define CMD_SET_DAQ_LIST_MODE_X2 0x02
-#define CMD_SET_DAQ_LIST_MODE_X3 0x03
-#define CMD_SET_DAQ_LIST_MODE_TIMESTAMP 0x04
-#define CMD_SET_DAQ_LIST_MODE_PID_OFF 0x05
-#define CMD_SET_DAQ_LIST_MODE_X6 0x06
-#define CMD_SET_DAQ_LIST_MODE_X7 0x07
+#define CMD_SET_DAQ_LIST_MODE_X0 0x01 << 0
+#define CMD_SET_DAQ_LIST_MODE_DIRECTION 0x01 << 1
+#define CMD_SET_DAQ_LIST_MODE_X2 0x01 << 2
+#define CMD_SET_DAQ_LIST_MODE_X3 0x01 << 3
+#define CMD_SET_DAQ_LIST_MODE_TIMESTAMP 0x01 << 4
+#define CMD_SET_DAQ_LIST_MODE_PID_OFF 0x01 << 5
+#define CMD_SET_DAQ_LIST_MODE_X6 0x01 << 6
+#define CMD_SET_DAQ_LIST_MODE_X7 0x01 << 7
 
 /* Start stop DAQ list mode */
 #define CMD_START_STOP_DAQ_LIST_MODE_STOP 0x00
@@ -175,9 +175,9 @@
 #define CMD_START_STOP_DAQ_LIST_MODE_SELECT 0x02
 
 /* Start stop synch mode */
-#define CMD_START_STOP_SYNCH_MODE_STOP 0X00
-#define CMD_START_STOP_SYNCH_MODE_START 0X01
-#define CMD_START_STOP_SYNCH_MODE_SELECT 0X02
+#define CMD_START_STOP_SYNCH_MODE_STOP 0x00
+#define CMD_START_STOP_SYNCH_MODE_START 0x01
+#define CMD_START_STOP_SYNCH_MODE_SELECT 0x02
 
 /* Get sector info address mode */
 #define CMD_GET_SECTOR_INFO_ADDRESS_MODE_GET_ADDRESS 0X00
@@ -262,6 +262,50 @@ static const value_string xcp_cmd[] = {
     { 0,             NULL }
 };
 
+static const value_string xcp_connection_mode[] = {
+    /* Standard commmand */
+    { CMD_CONNECT_NORMAL_MODE, "Normal"},
+    { CMD_CONNECT_USER_MODE,   "User" },
+
+    { 0,             NULL }
+};
+
+static const value_string xcp_get_id_type[] = {
+    /* Standard commmand */
+    { CMD_GET_ID_ASCII, "ASCII"},
+    { CMD_GET_ID_FILENAME_WITHOUT_PATH_AND_EXTENSION, "Filename without path and extension"},
+    { CMD_GET_ID_FILENAME_WITH_PATH_AND_EXTENSION, "Filename with path and extension"},
+    { CMD_GET_ID_URL, "URL"},
+    { CMD_GET_ID_FILE, "File"},
+
+    { 0,             NULL }
+};
+
+static const value_string xcp_get_seed_mode[] = {
+    /* Standard commmand */
+    { CMD_GET_SEED_MODE_FIRST, "First"},
+    { CMD_GET_SEED_MODE_REMAINING, "Remaining"},
+
+    { 0,             NULL }
+};
+
+static const value_string xcp_get_seed_resource[] = {
+    /* Standard commmand */
+    { CMD_GET_SEED_RESOURCE, "Resource"},
+    { CMD_GET_SEED_IGNORE, "Ignore"},
+
+    { 0,             NULL }
+};
+
+static const value_string xcp_transport_layer_cmd[] = {
+    /* Standard commmand */
+    { CMD_TRANSPORT_LAYER_GET_SLAVE_ID, "Get slave ID"},
+    { CMD_TRANSPORT_LAYER_GET_DAQ_ID, "Get DAQ ID"},
+    { CMD_TRANSPORT_LAYER_SET_DAQ_ID, "Set DAQ ID"},
+
+    { 0,             NULL }
+};
+
 static int proto_xcp;
 
 static int hf_xcp_len;
@@ -271,17 +315,49 @@ static int hf_xcp_fill;
 
 static int hf_xcp_connection_mode;
 static int hf_xcp_identification_type;
-static int hf_xcp_set_request_mode;
-static int hf_xcp_set_request_resource;
+
+static int hf_xcp_set_request_mode_flags;
+static int hf_xcp_set_request_store_cal_req_flag;
+static int hf_xcp_set_request_store_daq_req_flag;
+static int hf_xcp_set_request_clear_daq_req_flag;
+static int hf_xcp_set_request_x3;
+static int hf_xcp_set_request_x4;
+static int hf_xcp_set_request_x5;
+static int hf_xcp_set_request_x6;
+static int hf_xcp_set_request_x7;
+
+static int hf_xcp_set_request_session_configuration_id;
 
 static int hf_xcp_get_seed_mode;
 static int hf_xcp_get_seed_resource;
+
+static int hf_xcp_unlock_seed_len;
+static int hf_xcp_unlock_seed;
+
+static int hf_xcp_set_mta_reserved;
+static int hf_xcp_set_mta_address_extension;
+static int hf_xcp_set_mta_address;
+
+static int hf_xcp_upload_number_data_element;
+
+static int hf_xcp_short_upload_number_data_element;
+static int hf_xcp_short_upload_reserved;
+static int hf_xcp_short_upload_address_extension;
+static int hf_xcp_short_upload_address;
+
+static int hf_xcp_build_checksum_reserved;
+static int hf_xcp_build_checksum_block_size;
+
+static int hf_xcp_transport_layer_cmd_subcommand;
+
+static int hf_xcp_user_cmd_subcommand;
 
 /*static int hf_xcp_daq;
 static int hf_xcp_timestamp;
 static int hf_xcp_data;
 */
 static gint ett_xcp;
+static gint ett_xcp_set_request_mode;
 
 static void
 dissect_xcp_cmd_request(proto_tree *xcp_tree, tvbuff_t *tvb, guint pid, gint *offset)
@@ -289,20 +365,99 @@ dissect_xcp_cmd_request(proto_tree *xcp_tree, tvbuff_t *tvb, guint pid, gint *of
     if(pid == CMD_CONNECT)
     {
         proto_tree_add_item(xcp_tree, hf_xcp_connection_mode, tvb, *offset, 1, ENC_BIG_ENDIAN);
+        *offset += 1;
     }
     else if(pid == CMD_GET_ID)
     {
         proto_tree_add_item(xcp_tree, hf_xcp_identification_type, tvb, *offset, 1, ENC_BIG_ENDIAN);
+        *offset += 1;
     }
     else if(pid == CMD_SET_REQUEST)
     {
-        proto_tree_add_item(xcp_tree, hf_xcp_set_request_mode, tvb, *offset, 1, ENC_BIG_ENDIAN);
-        proto_tree_add_item(xcp_tree, hf_xcp_set_request_resource, tvb, *offset, 1, ENC_BIG_ENDIAN);
+        static int* const mode_bits[] = {
+            &hf_xcp_set_request_store_cal_req_flag,
+            &hf_xcp_set_request_store_daq_req_flag,
+            &hf_xcp_set_request_clear_daq_req_flag,
+            &hf_xcp_set_request_x3,
+            &hf_xcp_set_request_x4,
+            &hf_xcp_set_request_x5,
+            &hf_xcp_set_request_x6,
+            &hf_xcp_set_request_x7,
+            NULL
+        };
+
+        proto_tree_add_bitmask(xcp_tree, tvb, *offset, hf_xcp_set_request_mode_flags, ett_xcp_set_request_mode, mode_bits, ENC_BIG_ENDIAN);
+        *offset += 1;
+        proto_tree_add_item(xcp_tree, hf_xcp_set_request_session_configuration_id, tvb, *offset, 2, ENC_BIG_ENDIAN);
+        *offset += 2; 
     }
     else if(pid == CMD_GET_SEED)
     {
         proto_tree_add_item(xcp_tree, hf_xcp_get_seed_mode, tvb, *offset, 1, ENC_BIG_ENDIAN);
+        *offset += 1;
         proto_tree_add_item(xcp_tree, hf_xcp_get_seed_resource, tvb, *offset, 1, ENC_BIG_ENDIAN);
+        *offset += 1;
+    }
+    else if(pid == CMD_UNLOCK)
+    {
+        guint8 seed_length;
+
+        seed_length = tvb_get_guint8(tvb, *offset);
+        proto_tree_add_item(xcp_tree, hf_xcp_unlock_seed_len, tvb, *offset, 1, ENC_BIG_ENDIAN);
+        *offset += 1;
+
+        if(seed_length != 0x00)
+        {
+            proto_tree_add_item(xcp_tree, hf_xcp_unlock_seed, tvb, *offset, seed_length, ENC_ASCII);
+            *offset += seed_length;            
+        }
+    }
+    else if(pid == CMD_SET_MTA)
+    {
+        proto_tree_add_item(xcp_tree, hf_xcp_set_mta_reserved, tvb, *offset, 2, ENC_BIG_ENDIAN);
+        *offset += 2;
+        proto_tree_add_item(xcp_tree, hf_xcp_set_mta_address_extension, tvb, *offset, 1, ENC_BIG_ENDIAN);
+        *offset += 1;
+        proto_tree_add_item(xcp_tree, hf_xcp_set_mta_address, tvb, *offset, 4, ENC_BIG_ENDIAN);
+        *offset += 14;
+    }
+    else if(pid == CMD_UPLOAD)
+    {
+        proto_tree_add_item(xcp_tree, hf_xcp_upload_number_data_element, tvb, *offset, 1, ENC_BIG_ENDIAN);
+        *offset += 1;
+    }
+    else if(pid == CMD_SHORT_UPLOAD)
+    {
+        proto_tree_add_item(xcp_tree, hf_xcp_short_upload_number_data_element, tvb, *offset, 1, ENC_BIG_ENDIAN);
+        *offset += 1;
+        proto_tree_add_item(xcp_tree, hf_xcp_short_upload_reserved, tvb, *offset, 1, ENC_BIG_ENDIAN);
+        *offset += 1;
+        proto_tree_add_item(xcp_tree, hf_xcp_short_upload_address_extension, tvb, *offset, 1, ENC_BIG_ENDIAN);
+        *offset += 1;
+        proto_tree_add_item(xcp_tree, hf_xcp_short_upload_address, tvb, *offset, 4, ENC_BIG_ENDIAN);
+        *offset += 4;
+    }
+    else if(pid == CMD_BUILD_CHECKSUM)
+    {
+        proto_tree_add_item(xcp_tree, hf_xcp_build_checksum_reserved, tvb, *offset, 3, ENC_BIG_ENDIAN);
+        *offset += 3;
+        proto_tree_add_item(xcp_tree, hf_xcp_build_checksum_block_size, tvb, *offset, 4, ENC_BIG_ENDIAN);
+        *offset += 4;
+    }
+    else if(pid == CMD_TRANSPORT_LAYER_CMD)
+    {
+        /* TODO: Add subcommand parsing */
+        proto_tree_add_item(xcp_tree, hf_xcp_transport_layer_cmd_subcommand, tvb, *offset, 1, ENC_BIG_ENDIAN);
+        *offset += 1;
+    }
+    else if(pid == CMD_USER_CMD)
+    {
+        proto_tree_add_item(xcp_tree, hf_xcp_user_cmd_subcommand, tvb, *offset, 1, ENC_BIG_ENDIAN);
+        *offset += 1;
+    }
+    else if(pid == CMD_DOWNLOAD)
+    {
+        /* TODO: Add parsing */
     }
 }
 
@@ -380,29 +535,105 @@ proto_register_xcp(void)
 
         { &hf_xcp_connection_mode,
             {   "Connection mode", "xcp.connection_mode", FT_UINT8, BASE_DEC,  
-                NULL, 0x0, NULL, HFILL } },
+                VALS(xcp_connection_mode), 0x0, NULL, HFILL } },
 
         { &hf_xcp_identification_type,
             {   "Identification type", "xcp.identification_type", FT_UINT8, BASE_DEC,  
-                NULL, 0x0, NULL, HFILL } },
+                VALS(xcp_get_id_type), 0x0, NULL, HFILL } },
 
-        { &hf_xcp_set_request_mode,
+        { &hf_xcp_set_request_mode_flags,
             {   "Mode", "xcp.mode", FT_UINT8, BASE_DEC,  
                 NULL, 0x0, NULL, HFILL } },
-        { &hf_xcp_set_request_resource,
-            {   "Resource", "xcp.resource", FT_UINT16, BASE_DEC,  
+        { &hf_xcp_set_request_store_cal_req_flag,
+            {   "Store CAL request flag", "xcp.set_request.store_cal_req", FT_BOOLEAN, 8,  
+                NULL, CMD_SET_REQUEST_STORE_CAL_REQ, NULL, HFILL } },
+        { &hf_xcp_set_request_store_daq_req_flag,
+            {   "Store DAQ request flag", "xcp.set_request.store_daq_req", FT_BOOLEAN, 8,  
+                NULL, CMD_SET_REQUEST_STORE_DAQ_REQ, NULL, HFILL } },
+        { &hf_xcp_set_request_clear_daq_req_flag,
+            {   "Clear DAQ request flag", "xcp.set_request.clear_daq_req", FT_BOOLEAN, 8,  
+                NULL, CMD_SET_REQUEST_CLEAR_DAQ_REQ, NULL, HFILL } },
+        { &hf_xcp_set_request_x3,
+            {   "X3", "xcp.set_request.x3", FT_BOOLEAN, 8,  
+                NULL, CMD_SET_REQUEST_X3, NULL, HFILL } },
+        { &hf_xcp_set_request_x4,
+            {   "X4", "xcp.set_request.x4", FT_BOOLEAN, 8,  
+                NULL, CMD_SET_REQUEST_X4, NULL, HFILL } },
+        { &hf_xcp_set_request_x5,
+            {   "X5", "xcp.set_request.x5", FT_BOOLEAN, 8,  
+                NULL, CMD_SET_REQUEST_X5, NULL, HFILL } },
+        { &hf_xcp_set_request_x6,
+            {   "X6", "xcp.set_request.x6", FT_BOOLEAN, 8,  
+                NULL, CMD_SET_REQUEST_X6, NULL, HFILL } },
+        { &hf_xcp_set_request_x7,
+            {   "X7", "xcp.set_request.x7", FT_BOOLEAN, 8,  
+                NULL, CMD_SET_REQUEST_X7, NULL, HFILL } },
+
+        { &hf_xcp_set_request_session_configuration_id,
+            {   "Session configuration ID", "xcp.session_configuration_id", FT_UINT16, BASE_DEC,  
                 NULL, 0x0, NULL, HFILL } },
 
         { &hf_xcp_get_seed_mode,
             {   "Mode", "xcp.mode", FT_UINT8, BASE_DEC,  
-                NULL, 0x0, NULL, HFILL } },
+                VALS(xcp_get_seed_mode), 0x0, NULL, HFILL } },
         { &hf_xcp_get_seed_resource,
             {   "Resource", "xcp.resource", FT_UINT8, BASE_DEC,  
+                VALS(xcp_get_seed_resource), 0x0, NULL, HFILL } },
+
+        { &hf_xcp_unlock_seed_len,
+            {   "Seed length", "xcp.seed_len", FT_UINT8, BASE_DEC,  
+                NULL, 0x0, NULL, HFILL } },
+
+        { &hf_xcp_unlock_seed,
+            {   "Seed", "xcp.seed", FT_STRING, BASE_NONE,  
+                NULL, 0x0, NULL, HFILL } },
+
+        { &hf_xcp_set_mta_reserved,
+            {   "Reserved", "xcp.reserved", FT_UINT16, BASE_DEC,  
+                NULL, 0x0, NULL, HFILL } },
+        { &hf_xcp_set_mta_address_extension,
+            {   "Address extension", "xcp.address_extension", FT_UINT8, BASE_DEC,  
+                NULL, 0x0, NULL, HFILL } },
+        { &hf_xcp_set_mta_address,
+            {   "Address", "xcp.address", FT_UINT32, BASE_DEC,  
+                NULL, 0x0, NULL, HFILL } },
+
+        { &hf_xcp_upload_number_data_element,
+            {   "Number of data element", "xcp.number_data_element", FT_UINT8, BASE_DEC,  
+                NULL, 0x0, NULL, HFILL } },
+
+        { &hf_xcp_short_upload_number_data_element,
+            {   "Number of data element", "xcp.number_data_element", FT_UINT8, BASE_DEC,  
+                NULL, 0x0, NULL, HFILL } },
+        { &hf_xcp_short_upload_reserved,
+            {   "Reserved", "xcp.reserved", FT_UINT8, BASE_DEC,  
+                NULL, 0x0, NULL, HFILL } },
+        { &hf_xcp_short_upload_address_extension,
+            {   "Address_extension", "xcp.address_extension", FT_UINT8, BASE_DEC,  
+                NULL, 0x0, NULL, HFILL } },
+        { &hf_xcp_short_upload_address,
+            {   "Address", "xcp.address", FT_UINT32, BASE_DEC,  
+                NULL, 0x0, NULL, HFILL } },
+
+        { &hf_xcp_build_checksum_reserved,
+            {   "Reserved", "xcp.reserved", 3, BASE_HEX,  
+                NULL, 0x0, NULL, HFILL } },
+        { &hf_xcp_build_checksum_block_size,
+            {   "Block size", "xcp.block_size", FT_UINT32, BASE_DEC,  
+                NULL, 0x0, NULL, HFILL } },
+
+        { &hf_xcp_transport_layer_cmd_subcommand,
+            {   "Sub command", "xcp.subcommand", FT_UINT8, BASE_DEC,  
+                VALS(xcp_transport_layer_cmd), 0x0, NULL, HFILL } },
+
+        { &hf_xcp_user_cmd_subcommand,
+            {   "Sub command", "xcp.subcommand", FT_UINT8, BASE_DEC,  
                 NULL, 0x0, NULL, HFILL } },
     };
 
     static gint *ett[] = {
-        &ett_xcp
+        &ett_xcp,
+        &ett_xcp_set_request_mode
     };
 
     proto_xcp = proto_register_protocol (
