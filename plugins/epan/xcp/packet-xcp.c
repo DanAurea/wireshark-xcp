@@ -362,6 +362,14 @@ static const value_string xcp_program_verify_verification_mode[] = {
     { 0,             NULL }
 };
 
+
+static const enum_val_t address_granularity[] = {
+    {"1", "1", 1},
+    {"2", "2", 2},
+    {"4", "4", 4},
+    {NULL, NULL, -1}
+};
+
 static int proto_xcp;
 
 static int hf_xcp_len;
@@ -407,6 +415,10 @@ static int hf_xcp_build_checksum_block_size;
 static int hf_xcp_transport_layer_cmd_subcommand;
 
 static int hf_xcp_user_cmd_subcommand;
+
+static int hf_xcp_download_number_data_elements;
+static int hf_xcp_download_alignment;
+static int hf_xcp_download_data_elements;
 
 static int hf_xcp_short_download_len;
 static int hf_xcp_short_download_reserved;
@@ -520,6 +532,7 @@ static int hf_xcp_program_verify_verification_mode;
 static int hf_xcp_program_verify_verification_type;
 static int hf_xcp_program_verify_verification_value;
 
+/* Only used with DTO */
 /*static int hf_xcp_daq;
 static int hf_xcp_timestamp;
 static int hf_xcp_data;
@@ -530,6 +543,11 @@ static gint ett_xcp_set_request_mode;
 static gint ett_xcp_set_cal_page_mode;
 static gint ett_xcp_set_segment_mode;
 static gint ett_xcp_set_daq_list_mode;
+
+static gint global_address_granularity_value = 0;
+static gint global_max_cto = 0;
+/*static gint global_max_dto = 0;
+*/
 
 static void
 dissect_xcp_cmd_request(proto_tree *xcp_tree, tvbuff_t *tvb, guint pid, gint *offset)
@@ -627,13 +645,44 @@ dissect_xcp_cmd_request(proto_tree *xcp_tree, tvbuff_t *tvb, guint pid, gint *of
         proto_tree_add_item(xcp_tree, hf_xcp_user_cmd_subcommand, tvb, *offset, 1, ENC_BIG_ENDIAN);
         *offset += 1;
     }
-    else if(pid == CMD_DOWNLOAD)
+    else if(pid == CMD_DOWNLOAD || pid == CMD_DOWNLOAD_NEXT || pid == CMD_PROGRAM || pid == CMD_PROGRAM_NEXT)
     {
-        /* TODO: Add parsing */
+        guint8 data_elements_length;
+
+        data_elements_length = tvb_get_guint8(tvb, *offset);
+        proto_tree_add_item(xcp_tree, hf_xcp_download_number_data_elements, tvb, *offset, 1, ENC_BIG_ENDIAN);
+        *offset += 1;
+
+        if(global_address_granularity_value > 2)
+        {
+            guint8 alignment_length = global_address_granularity_value - 2;
+            proto_tree_add_item(xcp_tree, hf_xcp_download_alignment, tvb, *offset, alignment_length, ENC_BIG_ENDIAN);
+            *offset += alignment_length;
+        }
+
+        if(data_elements_length)
+        {
+            proto_tree_add_item(xcp_tree, hf_xcp_download_data_elements, tvb, *offset, data_elements_length, ENC_BIG_ENDIAN);
+            *offset += data_elements_length;
+        }
     }
-    else if(pid == CMD_DOWNLOAD_MAX)
+    else if(pid == CMD_DOWNLOAD_MAX || pid == CMD_PROGRAM_MAX)
     {
-        /* TODO: Add parsing */
+        guint8 data_elements_length;
+
+        if(global_address_granularity_value > 1)
+        {
+            guint8 alignment_length = global_address_granularity_value - 1;
+            proto_tree_add_item(xcp_tree, hf_xcp_download_alignment, tvb, *offset, alignment_length, ENC_BIG_ENDIAN);
+            *offset += alignment_length;
+        }
+
+        data_elements_length = global_max_cto;
+        if(data_elements_length)
+        {
+            proto_tree_add_item(xcp_tree, hf_xcp_download_data_elements, tvb, *offset, data_elements_length, ENC_BIG_ENDIAN);
+            *offset += data_elements_length;
+        }
     }
     else if(pid == CMD_SHORT_DOWNLOAD)
     {
@@ -892,7 +941,6 @@ dissect_xcp_cmd_request(proto_tree *xcp_tree, tvbuff_t *tvb, guint pid, gint *of
         proto_tree_add_item(xcp_tree, hf_xcp_program_verify_verification_value, tvb, *offset, 4, ENC_BIG_ENDIAN);
         *offset += 4;
     }
-
 }
 
 static int
@@ -931,6 +979,7 @@ dissect_xcp(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree _U_, void *data 
 
     dissect_xcp_cmd_request(xcp_tree, tvb, pid, &offset);
 
+    /* Meaningful only for DTO */
     if (data_len > 1)
     {
     /* TODO: Check when FILL is required */
@@ -1062,6 +1111,16 @@ proto_register_xcp(void)
 
         { &hf_xcp_user_cmd_subcommand,
             {   "Sub command", "xcp.subcommand", FT_UINT8, BASE_DEC,  
+                NULL, 0x0, NULL, HFILL } },
+
+        { &hf_xcp_download_number_data_elements,
+            {   "Number of data elements", "xcp.num_data_elements", FT_UINT8, BASE_DEC,  
+                NULL, 0x0, NULL, HFILL } },
+        { &hf_xcp_download_alignment,
+            {   "Alignment", "xcp.alignment", FT_STRING, BASE_NONE,  
+                NULL, 0x0, NULL, HFILL } },
+        { &hf_xcp_download_data_elements,
+            {   "Data elements", "xcp.data_elements", FT_STRING, BASE_NONE,  
                 NULL, 0x0, NULL, HFILL } },
 
         { &hf_xcp_short_download_len,
@@ -1368,6 +1427,7 @@ proto_register_xcp(void)
 
     proto_register_field_array(proto_xcp, hf, array_length(hf));
     proto_register_subtree_array(ett, array_length(ett));
+
 }
 
 void
@@ -1378,4 +1438,12 @@ proto_reg_handoff_xcp(void)
     xcp_handle = create_dissector_handle(dissect_xcp, proto_xcp);
     dissector_add_uint_range_with_preference("udp.port", XCP_PORT_RANGE, xcp_handle);
     dissector_add_uint_range_with_preference("tcp.port", XCP_PORT_RANGE, xcp_handle);
+
+    module_t *xcp_module = prefs_register_protocol(proto_xcp, NULL);
+    prefs_register_enum_preference(xcp_module, "address_granularity",
+        "Address granularity",
+        "Define the address granularity",
+        &global_address_granularity_value,
+        address_granularity, FALSE
+        );
 }
