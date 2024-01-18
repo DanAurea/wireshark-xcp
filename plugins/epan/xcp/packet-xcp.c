@@ -1068,7 +1068,7 @@ proto_register_xcp(void)
                 NULL, 0x0, NULL, HFILL } },
 
         { &hf_xcp_unlock_seed,
-            {   "Seed", "xcp.seed", FT_STRING, BASE_NONE,  
+            {   "Seed", "xcp.seed", FT_BYTES, BASE_NONE,  
                 NULL, 0x0, NULL, HFILL } },
 
         { &hf_xcp_set_mta_reserved,
@@ -1120,7 +1120,7 @@ proto_register_xcp(void)
             {   "Alignment", "xcp.alignment", FT_STRING, BASE_NONE,  
                 NULL, 0x0, NULL, HFILL } },
         { &hf_xcp_download_data_elements,
-            {   "Data elements", "xcp.data_elements", FT_STRING, BASE_NONE,  
+            {   "Data elements", "xcp.data_elements", FT_BYTES, BASE_NONE,  
                 NULL, 0x0, NULL, HFILL } },
 
         { &hf_xcp_short_download_len,
@@ -1136,7 +1136,7 @@ proto_register_xcp(void)
             {   "Address", "xcp.address", FT_UINT32, BASE_DEC,  
                 NULL, 0x0, NULL, HFILL } },
         { &hf_xcp_short_download_data_elements,
-            {   "Data elements", "xcp.data_elements", FT_STRING, BASE_NONE,  
+            {   "Data elements", "xcp.data_elements", FT_BYTES, BASE_NONE,  
                 NULL, 0x0, NULL, HFILL } },
 
         { &hf_xcp_modify_bits_shift_value,
